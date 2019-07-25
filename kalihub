@@ -1,0 +1,463 @@
+#!/bin/bash
+#
+# Quickly restore from reinstallation.
+
+# TODO(nu11hex): Add URL update with software version update (ticket 0000)
+
+declare -r DELAY=3 # Number of seconds to display results
+
+declare -r KALI_OFFICIAL_SOURCE="
+deb https://http.kali.org/kali kali-rolling main non-free contrib
+deb-src https://http.kali.org/kali kali-rolling main non-free contrib"
+
+declare -r USTC_MIRROR_SOURCE="
+deb https://mirrors.ustc.edu.cn/kali kali-rolling main non-free contrib
+deb-src https://mirrors.ustc.edu.cn/kali kali-rolling main non-free contrib"
+
+declare -r SOURCES_FILE="/etc/apt/sources.list"
+
+declare -r USER_INSTALL="/usr/local/"
+
+declare -r NPM_URL="https://nodejs.org/dist/v11.13.0/node-v11.13.0-linux-x64.tar.xz"
+
+declare -r NPM_FILENAME="node-v11.13.0-linux-x64"
+
+declare -r HEXO_BLOG="/media/nu11hex/Virtualbox/Network/nu11hex.github.io/"
+
+declare -r HEXO_THEME_CACTUS_URL="https://github.com/probberechts/hexo-theme-cactus.git"
+
+declare -r JDK_URL="https://download.oracle.com/otn-pub/java/jdk/11.0.1+13/90cf5d8f270a4347a95050320eef3fb7/jdk-11.0.1_linux-x64_bin.tar.gz?AuthParam=1545993877_30b6b8e11cce2dd4b41c2fe16b3920b0"
+
+declare -r JDK_FILENAME="jdk-11.0.1"
+
+declare -r GHIDRA_URL="https://ghidra-sre.org/ghidra_9.0_PUBLIC_20190228.zip"
+
+declare -r GHIDRA_FILENAME="ghidra_9.0_PUBLIC_20190228"
+
+declare -r GRUB_CONFIG="/boot/grub/grub.cfg"
+
+#######################################
+# FunctionTemplate
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+
+uid_detect() {
+  if [[ "$(id -u)" -ne 0 ]]; then
+    echo -e "\nYou must run in root permission! \n\nTry sudo ./kalihub\n" >&2
+    exit 1
+  fi
+  return
+}
+
+quit_echo() {
+  echo -e "\nWish never see you again (≧∇≦)ﾉ"
+  exit
+}
+
+invalid_entry() {
+  echo -e "\nInvalid entry!" >&2
+  exit 1
+}
+
+confirm_failed() {
+  echo -e "\nConfirm_failed!" >&2
+  return 1
+}
+
+left_timer() {
+  for ((i="$0"; i>0; i--)); do
+    echo -e -n "${i}s left\a\r"
+    sleep 1
+  done
+}
+
+delay_echo() {
+  echo -e "\nWating "${DELAY}" seconds for jump back......"
+  return
+}
+
+reboot_echo() {
+  echo -e "\nReboot after "${REBOOT_DELAY}" seconds, please save works !"
+  left_timer
+  return
+}
+
+install_npm() {
+  wget "${NPM_URL}" \
+    && tar -Jxvf "${NPM_FILENAME}.tar.xz" \
+    && mv "${NPM_FILENAME}" "${USER_INSTALL}" \
+    && ln -s "${USER_INSTALL}${NPM_FILENAME}/bin/node" \
+         "${USER_INSTALL}/bin/node" \
+    && ln -s "${USER_INSTALL}${NPM_FILENAME}/bin/npm" \
+         "${USER_INSTALL}/bin/npm"
+  return
+}
+
+install_hexo() {
+  npm install -g hexo-cli \
+    && ln -s $("${USER_INSTALL}${NPM_FILENAME}
+      /lib/node_modules/hexo-cli/bin/hexo") "${USER_INSTALL}/bin/hexo" \
+    && hexo init "${HEXO_BLOG}" \
+    && cd "${HEXO_BLOG}" \
+    && npm install \
+    && npm install hexo-generator-feed --save \
+    && npm install hexo-generator-search --save \
+    && npm install hexo-deployer-git --save \
+    && git clone "${HEXO_THEME_CACTUS_URL}" "themes/cactus"
+  return
+}
+
+install_oracle_jdk() {
+  wget "${JDK_URL}" \
+    && tar -zxvf "${JDK_FILENAME}_linux-x64_bin.tar.gz" \
+    && mv "${JDK_FILENAME}" "${USER_INSTALL}" \
+    && update-alternatives --install /usr/bin/java java \
+         ${USER_INSTALL}${JDK_FILENAME}/bin/java 1 \
+    && update-alternatives --install /usr/bin/javac javac \
+         ${USER_INSTALL}${JDK_FILENAME}/bin/javac 1 \
+    && update-alternatives --set java ${USER_INSTALL}${JDK_FILENAME}/bin/java \
+    && update-alternatives --set javac ${USER_INSTALL}${JDK_FILENAME}/bin/javac
+}
+
+install_ghidra() {
+  wget "${GHIDRA_URL}" \
+    && tar -zxvf "${GHIDRA_FILENAME}" \
+    && mv "${GHIDRA_FILENAME}" "${USER_INSTALL}" \
+    && ln -s "${USER_INSTALL}${GHIDRA_FILENAME}/ghidraRun" \
+         "${USER_INSTALL}/bin/ghidra"
+  return
+}
+
+add_source() {
+  while true; do
+    clear
+    echo "
+#######################################
+#
+#      0. Quit Function
+#
+#      1. Add Kali Official Source
+#
+#      2. Add USTC Mirror Source
+#
+#
+#######################################
+    "
+    read -p "Enter selection [0-2] > "
+    if [[ "${REPLY}" =~ ^[0-2]$ ]]; then
+      if [[ "${REPLY}" == 0 ]]; then
+        dpkg --add-architecture i386 && apt update
+        sleep "${DELAY}"
+        break
+      fi
+      if [[ "${REPLY}" == 1 ]]; then
+        echo "${KALI_OFFICIAL_SOURCE}" >> "${SOURCES_FILE}"
+        delay_echo
+        sleep "${DELAY}"
+        continue
+      fi
+      if [[ "${REPLY}" == 2 ]]; then
+        echo "${USTC_MIRROR_SOURCE}" >> "${SOURCES_FILE}"
+        delay_echo
+        sleep "${DELAY}"
+        continue
+      fi
+      else
+      invalid_entry
+    fi
+  done
+  return
+}
+
+upgrade_and_install() {
+  apt dist-upgrade -y && apt install -y apt-transport-https \
+   tor aria2 chromium telegram-desktop fcitx fcitx-pinyin \
+   gimp audacity ffmpeg obs-studio mesa-utils \
+   virtualbox packer vagrant wine32 playonlinux \
+   libapache2-mod-php libapache2-mod-security composer php-gd php-dev \
+   python3-dev default-libmysqlclient-dev libsqlite3-dev redis-server \
+   android-tools-adb fastboot \
+   veil shellter bdfproxy strace \
+  && curl -s https://get.docker.com/ | sh \
+  && /usr/share/veil/config/setup.sh --force --silent \
+  && bash <(curl -L -s https://install.direct/go.sh) \
+  && bash <(curl -L -s https://get.acme.sh) \
+  && bash <(curl -sLf https://spacevim.org/cn/install.sh) \
+  && pip3 install shadowsocks getproxy hackhttp hackrequests \
+      docker-compose pwn zio var_dump pocsuite3 \
+  && install_npm \
+  && install_hexo \
+  && install_oracle_jdk \
+  && install_ghidra \
+  && npm install -g eslint-cli js-beautify github-email \
+  && docker pull mcr.microsoft.com/mssql/server:2017-latest
+  # Ignored: AntSword, Eclipse, IDA, vscode, Visual_Paradigm etc.
+  return
+}
+
+restore_backup_files() {
+  # dconf dump / > dconf-settings.ini
+  # tar -zcf - filename | openssl des3 -salt -k password | dd of=config.des3
+  # cp /usr/local/AntSword/antSword/antData/db.ant ./db.ant
+  dd if=config.des3 | openssl des3 -d -k "${depassword}" | tar zxf -
+  dconf load / < dconf-settings.ini \
+  && mv config.json /etc/v2ray/config.json
+  return
+}
+
+install_nvidia_driver() {
+  while true; do
+    clear
+    echo "
+#######################################
+#
+#      0. Quit Function
+#
+#      1. Disable nouveau
+#
+#      2. Install NVIDIA Driver
+#
+#
+#######################################
+    "
+    read -p "Enter selection [0-2] > "
+    if [[ "${REPLY}" =~ ^[0-2]$ ]]; then
+      if [[ "${REPLY}" == 0 ]]; then
+        break
+      fi
+      if [[ "${REPLY}" == 1 ]]; then
+        lspci | grep -E "VGA|3D"
+        read -p "Anykey to continue, or CTRL+C to abort > " trash_variable
+        echo -e $("blacklist nouveau\noptions nouveau modeset=0\n
+          alias nouveau off") > /etc/modprobe.d/blacklist-nouveau.conf
+        mv grub /etc/default/grub
+        read -p "Anykey to continue, or CTRL+C to abort > " trash_variable
+        update-grub && update-initramfs -u && reboot_echo && reboot
+      fi
+      if [[ "${REPLY}" == 2 ]]; then
+        lsmod | grep -i nouveau
+        read -p "Anykey to continue, or CTRL+C to abort > " trash_variable
+        apt install -y nvidia-driver nvidia-xconfig libgl1-nvidia-glx:i386
+        busid=$(nvidia-xconfig --query-gpu-info 
+          | grep 'BusID : ' | cut -d ' ' -f6)
+        echo -e "
+Section "ServerLayout"
+    Identifier "layout"
+    Screen 0 "nvidia"
+    Inactive "intel"
+EndSection
+
+Section "Device"
+    Identifier "nvidia"
+    Driver "nvidia"
+    BusID "${busid}"
+EndSection
+
+Section "Screen"
+    Identifier "nvidia"
+    Device "nvidia"
+    Option "AllowEmptyInitialConfiguration"
+EndSection
+
+Section "Device"
+    Identifier "intel"
+    Driver "modesetting"
+EndSection
+
+Section "Screen"
+    Identifier "intel"
+    Device "intel"
+EndSection
+        " > /etc/X11/xorg.conf
+        declare -r GDM_CONFIG="
+[Desktop Entry]
+Type=Application
+Name=Optimus
+Exec=sh -c "xrandr --setprovideroutputsource modesetting NVIDIA-0; xrandr --auto"
+NoDisplay=true
+X-GNOME-Autostart-Phase=DisplayServer"
+        echo "${GDM_CONFIG}" > /usr/share/gdm/greeter/autostart/optimus.desktop
+        echo "${GDM_CONFIG}" > /etc/xdg/autostart/optimus.desktop 
+        glxinfo | grep -i "direct rendering"
+        delay_echo
+        sleep "${DELAY}"
+      fi
+    fi
+  done
+  return
+}
+
+batch_git_pull() {
+  read -p "Enter folder path > " folder_path
+  cd "${folder_path}"
+  find . -maxdepth 1 -type d ! -path . | xargs -L 1 bash -c 'cd "$0" \
+    && pwd && git pull'
+  return
+}
+
+add_grub_password() {
+  while true; do
+    clear
+    read -p "Enter username > " username
+    read -p "Enter password > " passworda
+    read -p "Confirm password > " passwordb
+    if [[ "${passworda}" == "${passwordb}" ]]; then
+      password=$(echo -e "${passworda}\n${passwordb}" \
+        | grub-mkpasswd-pbkdf2 \
+        | awk '/grub.pbkdf/{print$NF}')
+      chmod +w "${GRUB_CONFIG}"
+      sed -i "1i password_pbkdf2 ${username} ${password}" "${GRUB_CONFIG}"
+      sed -i "1i set superusers=\"${username}\"" "${GRUB_CONFIG}"
+      chmod -w "${GRUB_CONFIG}"
+      break
+    else
+      confirm_failed
+      delay_echo
+      sleep "${DELAY}"
+      continue
+    fi
+  done
+  return
+}
+
+gen_psk_pub() {
+  while true; do 
+    clear
+    echo "
+#######################################
+#
+#      0. Quit Function
+#
+#      1. ECDSA Signature
+#
+#      2. RSA Signature
+#
+#      3. Ed25519 Signature
+#
+#
+#######################################
+    "
+    read -p "Enter selection [0-3] > "
+    if [[ "${REPLY}" =~ ^[0-3]$ ]]; then
+      if [[ "${REPLY}" == 0 ]]; then
+        break
+      fi
+      if [[ "${REPLY}" == 1 ]]; then
+        read -p "Input some comment > " ecdsa_comment
+        ssh-keygen -t ecdsa -o -a 100 -C "${ecdsa_comment}"
+      fi
+      if [[ "${REPLY}" == 2 ]]; then
+        read -p "Input some comment > " rsa_comment
+        ssh-keygen -t rsa -b 4096 -o -a 100 -C "${rsa_comment}"
+      fi
+      if [[ "${REPLY}" == 3 ]]; then
+        read -p "Input some comment > " ed25519_comment
+        ssh-keygen -t ed25519 -o -a 100 -C "${ed25519_comment}"
+      fi
+    fi
+  done
+  return
+}
+
+execute_all_function() {
+  read -p "Anykey to continue, or CTRL+C to exit > "
+  add_source
+  upgrade_and_install
+  restore_backup_files
+  install_nvidia_driver
+  batch_git_pull
+  add_grub_password
+  gen_psk_pub
+  return
+}
+
+main()
+{
+  uid_detect
+  while true; do
+    clear
+    echo "
+#######################################
+#
+#  Welcome to use KaliHub, Select >
+#
+#    0. Execute All Function
+#
+#    1. Add Source
+#
+#    2. Upgrade and Install
+#
+#    3. Restore Backup Files
+#
+#    4. Install NVIDIA Driver
+#
+#    5. Batch Git Pull
+#
+#    6. Add GRUB Password
+#
+#    7. Generate PSK and PUB
+#
+#    Q. Quit KaliHub
+#
+#
+#######################################
+    "
+    read -p "Enter selection [0-7] > "
+    case "${REPLY}" in
+      0) execute_all_function
+        delay_echo
+        sleep "${DELAY}"
+        continue
+        ;;
+      1) add_source
+        delay_echo
+        sleep "${DELAY}"
+        continue
+        ;;
+      2) upgrade_and_install
+        delay_echo
+        sleep "${DELAY}"
+        continue
+        ;;
+      3) restore_backup_files
+        delay_echo
+        sleep "${DELAY}"
+        continue
+        ;;
+      4) install_nvidia_driver
+        delay_echo
+        sleep "${DELAY}"
+        continue
+        ;;
+      5) batch_git_pull
+        delay_echo
+        sleep "${DELAY}"
+        continue
+        ;;
+      6) add_grub_password
+        delay_echo
+        sleep "${DELAY}"
+        continue
+        ;;
+      7) gen_psk_pub
+        delay_echo
+        sleep "${DELAY}"
+        continue
+        ;;
+      Q|q) quit_echo
+        ;;
+      "") continue
+        ;;
+      *) invalid_entry
+        ;;
+    esac
+  done
+  return
+}
+
+main

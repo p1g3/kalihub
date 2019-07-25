@@ -1,0 +1,7 @@
+{
+    "settings": {
+        "key": "?streamname=live_28785735_25181420&key=487ef20d565856d1d07dc4b886039c58",
+        "server": "rtmp://txy.live-send.acg.tv/live-txy/"
+    },
+    "type": "rtmp_custom"
+}
