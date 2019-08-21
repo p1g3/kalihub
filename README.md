@@ -22,6 +22,10 @@ chromium extensions fingerprint
 
 SwichyOmega config file
 
+## tampermonkey
+
+tampermonkey config and script files
+
 ## ublock.txt
 
 ublock config file
