@@ -18,6 +18,10 @@ dconf dump file
 
 chromium extensions fingerprint
 
+## Inoreader.xml
+
+RSS file
+
 ## OmegaOptions.bak
 
 SwichyOmega config file
