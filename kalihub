@@ -18,24 +18,6 @@ declare -r SOURCES_FILE="/etc/apt/sources.list"
 
 declare -r USER_INSTALL="/usr/local/"
 
-declare -r NPM_URL="https://nodejs.org/dist/v11.13.0/node-v11.13.0-linux-x64.tar.xz"
-
-declare -r NPM_FILENAME="node-v11.13.0-linux-x64"
-
-declare -r HEXO_BLOG="/media/nu11hex/Virtualbox/Network/nu11hex.github.io/"
-
-declare -r HEXO_THEME_CACTUS_URL="https://github.com/probberechts/hexo-theme-cactus.git"
-
-declare -r JDK_URL="https://download.oracle.com/otn-pub/java/jdk/11.0.1+13/90cf5d8f270a4347a95050320eef3fb7/jdk-11.0.1_linux-x64_bin.tar.gz?AuthParam=1545993877_30b6b8e11cce2dd4b41c2fe16b3920b0"
-
-declare -r JDK_FILENAME="jdk-11.0.1"
-
-declare -r GHIDRA_URL="https://ghidra-sre.org/ghidra_9.0_PUBLIC_20190228.zip"
-
-declare -r GHIDRA_FILENAME="ghidra_9.0_PUBLIC_20190228"
-
-declare -r GRUB_CONFIG="/boot/grub/grub.cfg"
-
 #######################################
 # FunctionTemplate
 # Globals:
@@ -84,52 +66,6 @@ delay_echo() {
 reboot_echo() {
   echo -e "\nReboot after "${REBOOT_DELAY}" seconds, please save works !"
   left_timer
-  return
-}
-
-install_npm() {
-  wget "${NPM_URL}" \
-    && tar -Jxvf "${NPM_FILENAME}.tar.xz" \
-    && mv "${NPM_FILENAME}" "${USER_INSTALL}" \
-    && ln -s "${USER_INSTALL}${NPM_FILENAME}/bin/node" \
-         "${USER_INSTALL}/bin/node" \
-    && ln -s "${USER_INSTALL}${NPM_FILENAME}/bin/npm" \
-         "${USER_INSTALL}/bin/npm"
-  return
-}
-
-install_hexo() {
-  npm install -g hexo-cli \
-    && ln -s $("${USER_INSTALL}${NPM_FILENAME}
-      /lib/node_modules/hexo-cli/bin/hexo") "${USER_INSTALL}/bin/hexo" \
-    && hexo init "${HEXO_BLOG}" \
-    && cd "${HEXO_BLOG}" \
-    && npm install \
-    && npm install hexo-generator-feed --save \
-    && npm install hexo-generator-search --save \
-    && npm install hexo-deployer-git --save \
-    && git clone "${HEXO_THEME_CACTUS_URL}" "themes/cactus"
-  return
-}
-
-install_oracle_jdk() {
-  wget "${JDK_URL}" \
-    && tar -zxvf "${JDK_FILENAME}_linux-x64_bin.tar.gz" \
-    && mv "${JDK_FILENAME}" "${USER_INSTALL}" \
-    && update-alternatives --install /usr/bin/java java \
-         ${USER_INSTALL}${JDK_FILENAME}/bin/java 1 \
-    && update-alternatives --install /usr/bin/javac javac \
-         ${USER_INSTALL}${JDK_FILENAME}/bin/javac 1 \
-    && update-alternatives --set java ${USER_INSTALL}${JDK_FILENAME}/bin/java \
-    && update-alternatives --set javac ${USER_INSTALL}${JDK_FILENAME}/bin/javac
-}
-
-install_ghidra() {
-  wget "${GHIDRA_URL}" \
-    && tar -zxvf "${GHIDRA_FILENAME}" \
-    && mv "${GHIDRA_FILENAME}" "${USER_INSTALL}" \
-    && ln -s "${USER_INSTALL}${GHIDRA_FILENAME}/ghidraRun" \
-         "${USER_INSTALL}/bin/ghidra"
   return
 }
 
@@ -190,13 +126,8 @@ upgrade_and_install() {
   && bash <(curl -sLf https://spacevim.org/cn/install.sh) \
   && pip3 install shadowsocks getproxy hackhttp hackrequests \
       docker-compose pwn zio var_dump pocsuite3 \
-  && install_npm \
-  && install_hexo \
-  && install_oracle_jdk \
-  && install_ghidra \
-  && npm install -g eslint-cli js-beautify github-email \
   && docker pull mcr.microsoft.com/mssql/server:2017-latest
-  # Ignored: AntSword, Eclipse, IDA, vscode, Visual_Paradigm etc.
+  # Ignored: AntSword, IDEA, IDA, vscode, Visual_Paradigm etc.
   return
 }
 
