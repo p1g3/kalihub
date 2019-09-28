@@ -2,26 +2,46 @@
 
 * Some scripts for initialize Kali, be used to quickly restore from reinstallation.
 
-## characters_only
+---
 
-OBS config files
+## add_source
 
-## config.json
+## apt_install
 
-v2ray server config file
+## add_grub_password
 
-## dconf-settings.ini
+## restore_backup_files
 
-dconf dump file
+## gen_psk_pub
 
-## OmegaOptions.bak
+## batch_git_pull
 
-SwichyOmega config file
+## install_nvidia_driver
 
-## ublock.txt
+---
 
-ublock config file
+## config
 
-## vimrc
+### characters_only
 
-vim config file
+* OBS config files
+
+### config.json
+
+* v2ray server config file
+
+### dconf-settings.ini
+
+* dconf dump file
+
+### OmegaOptions.bak
+
+* SwichyOmega config file
+
+### ublock.txt
+
+* ublock config file
+
+### vimrc
+
+* vim config file
