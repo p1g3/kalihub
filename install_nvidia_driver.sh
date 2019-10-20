@@ -27,12 +27,12 @@ install_nvidia_driver() {
           alias nouveau off") > /etc/modprobe.d/blacklist-nouveau.conf
         mv grub /etc/default/grub
         read -p "Anykey to continue, or CTRL+C to abort > " trash_variable
-        update-grub && update-initramfs -u && reboot_echo && reboot
+        update-grub && update-initramfs -u && reboot
       fi
       if [[ "${REPLY}" == 2 ]]; then
         lsmod | grep -i nouveau
         read -p "Anykey to continue, or CTRL+C to abort > " trash_variable
-        apt install -y nvidia-driver nvidia-xconfig libgl1-nvidia-glx:i386
+        apt install -y nvidia-driver nvidia-xconfig
         busid=$(nvidia-xconfig --query-gpu-info 
           | grep 'BusID : ' | cut -d ' ' -f6)
         echo -e "
