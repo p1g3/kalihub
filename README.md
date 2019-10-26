@@ -2,46 +2,42 @@
 
 * Some scripts for initialize Kali, be used to quickly restore from reinstallation.
 
----
+[add_source](./add_source.sh)
 
-## add_source
+[apt_install](./apt_install.sh)
 
-## apt_install
+[add_grub_password](./add_grub_password.sh)
 
-## add_grub_password
+[restore_backup_files](./restore_backup_files.sh)
 
-## restore_backup_files
+[gen_psk_pub](./gen_psk_pub.sh)
 
-## gen_psk_pub
+[batch_git_pull](./batch_git_pull.sh)
 
-## batch_git_pull
+[install_nvidia_driver](./install_nvidia_driver.sh)
 
-## install_nvidia_driver
+[caesar](./caesar/)
 
----
-
-## config
-
-### characters_only
+[characters_only](./config/characters_only/)
 
 * OBS config files
 
-### config.json
+[config.json](./config/config.json)
 
 * v2ray server config file
 
-### dconf-settings.ini
+[dconf-settings.ini](./config/dconf-settings.ini)
 
 * dconf dump file
 
-### OmegaOptions.bak
+[OmegaOptions.bak](./config/OmegaOptions.bak)
 
 * SwichyOmega config file
 
-### ublock.txt
+[ublock.txt](./config/ublock.txt)
 
 * ublock config file
 
-### vimrc
+[vimrc](./config/vimrc)
 
 * vim config file

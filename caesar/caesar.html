@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="keywords" content="caesar, encrypt, decrypt" />
+        <title>凯撒密码</title>
+        <link rel="stylesheet" href="./static/css/cipher.css" />
+        <link rel="shortcut icon" href="./static/favicon.ico" />
+    </head>
+    <body>
+        <div class="center">
+            <h1>凯撒密码</h1>
+            <textarea placeholder="待处理文本" id="todo"></textarea>
+            <br />
+            <p>偏移量：<input type="number" min="0" value="0" id="shift" />&emsp;&emsp;&emsp;&emsp;</p>
+            <p>
+                <input type="button" value="加密" class="click" id="encrypt" />
+                &emsp;
+                <input type="button" value="解密" class="click" id="decrypt" />
+                &emsp;
+                <input type="button" value="暴破" class="click" id="crack" />
+                &emsp;
+                <input type="button" value="智能" class="click" id="intel" />
+            </p>
+            <textarea placeholder="处理后结果" id="processed"></textarea>
+        </div>
+        <script type="text/javascript" src="./static/js/caesar.js"></script>
+    </body>
+</html>
