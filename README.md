@@ -41,3 +41,7 @@
 [vimrc](./config/vimrc)
 
 * vim config file
+
+[gitconfig](./config/.gitconfig)
+
+* git config file
