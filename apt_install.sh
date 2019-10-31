@@ -7,8 +7,8 @@ apt install -y apt-transport-https
 apt install fcitx fcitx-pinyin aria2 tor telegram-desktop \
  virtualbox wine64 playonlinux redis-server android-tools-adb fastboot \
  gimp audacity ffmpeg obs-studio mesa-utils \
- zaproxy veil shellter bdfproxy strace \
- python-pip libssl-dev \
+ veil shellter bdfproxy strace \
+ zaproxy python-pip gdb libssl-dev \
 && /usr/share/veil/config/setup.sh --force --silent \
 && bash <(curl -L -s https://install.direct/go.sh)
 # && bash <(curl -L -s https://get.acme.sh) \
