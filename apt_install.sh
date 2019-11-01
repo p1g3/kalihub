@@ -15,5 +15,5 @@ apt install fcitx fcitx-pinyin aria2 tor telegram-desktop \
 # && bash <(curl -sLf https://spacevim.org/install.sh) \
 # && bash <(curl -s https://get.docker.com) \
 # pip install pwntools zio
-# pip3 install docker-compose
-# Notice: VSCode, AntSword, IDA, IDEA
+# pip3 install pyjwt docker-compose
+# Notice: VSCode, AntSword, IDA, IDEA, node.js
