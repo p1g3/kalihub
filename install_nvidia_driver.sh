@@ -22,16 +22,16 @@ install_nvidia_driver() {
       fi
       if [[ "${REPLY}" == 1 ]]; then
         lspci | grep -E "VGA|3D"
-        read -p "Anykey to continue, or CTRL+C to abort > " trash_variable
+        # read -p "Anykey to continue, or CTRL+C to abort > " trash_variable
         echo -e $("blacklist nouveau\noptions nouveau modeset=0\n
           alias nouveau off") > /etc/modprobe.d/blacklist-nouveau.conf
-        mv grub /etc/default/grub
-        read -p "Anykey to continue, or CTRL+C to abort > " trash_variable
+        # mv grub /etc/default/grub
+        # read -p "Anykey to continue, or CTRL+C to abort > " trash_variable
         update-grub && update-initramfs -u && reboot
       fi
       if [[ "${REPLY}" == 2 ]]; then
         lsmod | grep -i nouveau
-        read -p "Anykey to continue, or CTRL+C to abort > " trash_variable
+        # read -p "Anykey to continue, or CTRL+C to abort > " trash_variable
         apt install -y nvidia-driver nvidia-xconfig
         busid=$(nvidia-xconfig --query-gpu-info 
           | grep 'BusID : ' | cut -d ' ' -f6)

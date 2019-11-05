@@ -7,7 +7,7 @@ apt install -y apt-transport-https
 apt install fcitx fcitx-pinyin virtualbox wine64 playonlinux \
  aria2 tor telegram-desktop gimp audacity ffmpeg obs-studio mesa-utils \
  php-fpm php7.3-fpm python-pip libssl-dev redis-server android-tools-adb \
- zaproxy gdb foremost fastboot strace \
+ zaproxy gdb foremost volatility fastboot strace \
  veil shellter bdfproxy \
 && /usr/share/veil/config/setup.sh --force --silent \
 && bash <(curl -L -s https://install.direct/go.sh)
