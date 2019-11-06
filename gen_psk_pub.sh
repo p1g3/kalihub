@@ -27,6 +27,7 @@ while true; do
     fi
     # openssl genrsa -aes256 -out rsa-key.pem 4096
     # openssl rsa -in rsa-key.pem -outform PEM -out rsa-prv.pem
+    # openssl rsa -in rsa-key.pem -outform PEM -pubout -out rsa-pub.pem
     if [[ "${REPLY}" == 2 ]]; then
       read -p "Input some comment > " rsa_comment
       ssh-keygen -t rsa -b 4096 -o -a 100 -C "${rsa_comment}"
