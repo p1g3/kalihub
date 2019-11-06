@@ -25,6 +25,8 @@ while true; do
       read -p "Input some comment > " ecdsa_comment
       ssh-keygen -t ecdsa -o -a 100 -C "${ecdsa_comment}"
     fi
+    # openssl genrsa -aes256 -out rsa-key.pem 4096
+    # openssl rsa -in rsa-key.pem -outform PEM -out rsa-prv.pem
     if [[ "${REPLY}" == 2 ]]; then
       read -p "Input some comment > " rsa_comment
       ssh-keygen -t rsa -b 4096 -o -a 100 -C "${rsa_comment}"
